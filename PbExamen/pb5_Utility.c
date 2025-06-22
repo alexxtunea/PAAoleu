@@ -16,6 +16,7 @@ Given the cost matrix for connecting different neighborhoods, design an algorith
 
 #define MAX_NODES 20
 #define MAXIM 100
+#define INF 10000
 
 int m_costuri[MAX_NODES][MAX_NODES], nodes;
 
@@ -82,6 +83,90 @@ void Kruskal()
             printf("Muchie adaugata: %c - %c cu cost %d\n", i_min + 'A', j_min + 'A', m_costuri[i_min][j_min]);
         }
     }
+}
+
+void dijkstra(int nodes, int m_a[MAX_NODES][MAX_NODES], int dist[MAX_NODES], int pred[MAX_NODES])
+{
+    //initializam vectorii de vizitare, distanta si predecesori
+    int vizitat[MAX_NODES] = {0};
+    for(int i=0; i<nodes; i++)
+    {
+            dist[i] = INF;
+            pred[i] = -1;
+    }
+
+    for(int pas = 1; pas < nodes - 1; pas++)
+    {
+        int minim = MAXIM, u = -1;
+
+        for(int i=0; i<nodes; i++)
+            if(vizitat[i]==0 && dist[i]<minim)
+                {
+                    minim = dist[i];
+                    u = i;
+                }
+
+        if(u == -1) break;
+        vizitat[u] = 1;
+        for(int v=0; v<nodes; v++)
+                if(vizitat[v]==0 && m_a[u][v]>0 && m_a[u][v] + dist[u] < dist[v])
+                {
+                    dist[v] = dist[u] + m_a[u][v];
+                    pred[v] = u;
+                }
+    }
+}
+
+void afisare_drum(int pred[MAX_NODES], int dest)
+{
+    if(pred[dest] == -1)
+    {
+        printf("%d ", dest);
+        return;
+    }
+    afisare_drum(pred, pred[dest]);
+    printf(" -> %d", dest);
+}
+
+
+void fw(int nodes, int m_a[MAX_NODES][MAX_NODES], int d[MAX_NODES][MAX_NODES], int t[MAX_NODES][MAX_NODES])
+{
+    //initializam vectorul de dist si de noduri intermediare
+    for(int i=0; i<nodes; i++)
+        for(int j=0; j<nodes; j++)
+        {
+            if(i == j)
+                d[i][j] == 0;
+            else if(m_a[i][j]!=0)
+                d[i][j] = m_a[i][j];
+            else
+                d[i][j] = INF;
+            t[i][j] = -1; //nu avem noduri intermediare for now
+        }
+
+    for(int k=0; k<nodes; k++)
+        for(int i=0; i<nodes; i++)
+            for(int j=0; j<nodes; j++)
+            {
+                if(d[i][k] + d[k][j] < d[i][j])
+                {
+                    d[i][j] = d[i][k] + d[k][j];
+                    t[i][j] = k;
+                }
+            }
+}
+
+//functie care afiseaza drumul cu nodurile intermediare
+void afisare_traseu(int i, int j, int t[MAX_NODES][MAX_NODES])
+{
+    int k = t[i][j];
+    if(k == -1)
+    {
+        return;
+    }
+    afisare_traseu(i, k, t);
+    printf("%d ", k);
+    afisare_traseu(k, j, t);
 }
 
 int main()
